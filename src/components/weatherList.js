@@ -4,14 +4,10 @@ import '../static/styles/app.css'
 import {getIconSrc, parseTime} from './../helpers'
 import {connect} from 'react-redux'
 import {
-    currentWeatherLoadingStateSelector,
-    addCityWeather,
-    START_LOADING,
-    END_LOADING,
-    citySelector,
-    weatherListSelector
+    weatherListSelector,
+    changeCursor,
 } from './../ducks/currentWeather'
-import moment from 'moment'
+import cn from 'classnames'
 
 
 class WeatherList extends Component{
@@ -20,29 +16,35 @@ class WeatherList extends Component{
         const settings = {
             dots: false,
             arrows: true,
-            infinite: true,
+            infinite: false,
             speed: 500,
             slidesToShow: 8,
-            slidesToScroll: 1
+            slidesToScroll: 4,
         };
+        /*console.log('--- weather list props', this.props)*/
         return(
             <div className="list-city">
                 <Slider {...settings}>
                     {
-                        weatherList.map((item) => {
+                        weatherList.map((item, index) => {
                             //return <WeatherItem key={item.dt} item = {item} />
                             let {dt, dt_txt, main, weather} = item
                             let {temp} = main
                             let {description, icon} = weather[0] || {}
-                            console.log('--- list item', item)
+                           /* console.log('--- list item', item)*/
 
                             let _moment = parseTime(dt_txt)
-                            // TODO
-                            let momentDate = _moment.format("ddd MM")
+                            let momentDate = _moment.format("ddd DD")
                             let momentTime = _moment.format("HH : mm")
 
+                            // TODO check if item is active -- if cursor === index
+                            let isActive
+
                             return (
-                                <div key={dt} className="weather-item">
+                                <div key={dt} onClick={this.handleClick(index)} className={cn({
+                                    "weather-item" : 1,
+                                    "active" : isActive,
+                                })}>
                                     <p className="datetime">{momentDate}</p>
                                     <p className="datetime">{momentTime}</p>
                                     <div className="cloudness-icon">
@@ -58,17 +60,31 @@ class WeatherList extends Component{
             </div>
         )
     }
-}
 
-let mapStateToProps = (state, ownProps) => {
-    return {
-        isLoading : currentWeatherLoadingStateSelector(state), // Why do you need this ?
-        cityName : citySelector(state), // Why do you need this ?
-        weatherList : weatherListSelector(state),
+    handleClick = (index) => () => {
+        this.props.changeCursor(index);
     }
 }
 
-let decorator = connect(mapStateToProps)
+
+let mapStateToProps = (state, ownProps) => {
+    return {
+        weatherList : weatherListSelector(state),
+        // TODO
+        // cursor : cursorSelector(state)
+    }
+}
+
+let mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        changeCursor : (index) => {
+            let cursor = index
+            dispatch(changeCursor(cursor))
+        }
+    }
+}
+
+let decorator = connect(mapStateToProps, mapDispatchToProps)
 let connectedWeatherList = decorator(WeatherList)
 
 export default connectedWeatherList

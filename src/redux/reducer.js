@@ -4,25 +4,12 @@
 
 
 import {combineReducers} from 'redux'
-import currentWeatherReducer, {moduleName as currentWeatherModuleName, SET_CITY_WEATHER} from "../ducks/currentWeather";
-
+import currentWeatherReducer, {moduleName as currentWeatherModuleName} from "../ducks/currentWeather";
+import appReducer, {moduleName as appModuleName} from "../ducks/app";
 
 const reducer = combineReducers({
     [currentWeatherModuleName] : currentWeatherReducer,
-    test : (state = "test", action) => {
-        // console.log(action)
-        return "test"
-    },
-    test2 : (state = "test2", action) => {
-        // console.log(action)
-        return "test2"
-    },
-    test3 : (state = "test3", action) => {
-        if (action.type === SET_CITY_WEATHER) {
-            return SET_CITY_WEATHER
-        }
-        return state
-    }
+    [appModuleName] : appReducer
 })
 
 console.log("typeof reducer is: ", typeof reducer)

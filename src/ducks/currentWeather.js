@@ -1,4 +1,4 @@
-import {APP_NAME} from '../settings'
+import {APP_NAME, WEATHER_API_KEY} from '../settings'
 import {getCityWeatherId} from './_helpers'
 
 
@@ -10,6 +10,7 @@ export const moduleName = 'currentSuperWeather'
 const prefix = `${APP_NAME}/${moduleName}`
 
 export const SET_CITY_WEATHER = `${prefix}/SET_CITY_WEATHER` // test-weather/currentWeather/SET_CITY_WEATHER
+export const SET_CITY_WEATHER_AJAX = `${prefix}/SET_CITY_WEATHER_AJAX` // just for comparing
 export const START_LOADING = `${prefix}/START_LOADING`
 export const END_LOADING = `${prefix}/END_LOADING`
 export const CHANGE_CURSOR = `${prefix}/CHANGE_CURSOR`
@@ -36,6 +37,11 @@ const reducer = (state = defaultState, action) => {
                 entity : cityWeather,
             }
             break
+        }
+        case SET_CITY_WEATHER_AJAX : {
+            console.log(action)
+
+            return state
         }
         case START_LOADING : {
             return {
@@ -83,6 +89,17 @@ export const addCityWeather = cityWeather => {
     }
 }
 
+export const addCityWeatherAjax = query => {
+    return {
+        type : SET_CITY_WEATHER_AJAX,
+        payload : {
+            ajax : {
+                url : `https://api.openweathermap.org/data/2.5/forecast?q=${query}&units=metric&appid=${WEATHER_API_KEY}`,
+            }
+        }
+    }
+}
+
 export const changeCursor = cursor => {
     return {
         type : CHANGE_CURSOR,
@@ -107,8 +124,27 @@ export const citySelector = state => {
     return entity.city.name
 }
 
+export const cityCountry = state => {
+    let entity = state[moduleName].entity
+    if (!entity) return null
+    return entity.city.country
+}
+
 export const weatherListSelector = state => {
     let entity = state[moduleName].entity
     if(!entity) return []
     return entity.list
+}
+
+export const cursorSelector = state => {
+    return state[moduleName].cursor
+}
+
+export const chosenWeatherItemSelector = state => {
+    let weatherList = weatherListSelector(state)
+    let cursor = cursorSelector(state)
+    // access = age > 14 ? true : false;
+    cursor = cursor === null ? 0 : cursor
+    let chosen = weatherList[cursor]
+    return chosen
 }

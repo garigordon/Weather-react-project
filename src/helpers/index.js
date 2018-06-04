@@ -1,6 +1,7 @@
 import {WEATHER_ICON_BASE_URL} from './../settings'
 import {WEATHER_API_KEY, WEATHER_ICON_GUIDE} from "../settings";
 import moment from 'moment'
+import cn from 'classnames'
 
 
 export const hPaToMercury = hPa => {
@@ -44,3 +45,4 @@ export const parseTime = timeStr => {
 
 // TODO
 // write function fetchWeatherByCityId
+window.___cn = cn

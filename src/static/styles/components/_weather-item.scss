@@ -46,10 +46,41 @@
   }
 }
 
+.city-name {
+  padding: 10px;
+  font-size: 32px;
+}
+.city-name, .wheather-props {
+  display: flex;
+  justify-content: center;
+}
+
 .datetime {
   text-align: center;
   display: block;
   margin-bottom: 10px;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.main-wheather-prop {
+  padding-right: 50px;
+  text-align: center;
+  display: flex;
+  align-items: flex-start;
+}
+
+.wheather-prop, .wheather-prop-icon {
+  margin: 10px 5px;
+  font-size: 24px;
+}
+
+.wheather-prop-unit {
+  font-size: 14px;
+}
+
+.cloudness{
+  img{
+    width: 100%;
+  }
 }

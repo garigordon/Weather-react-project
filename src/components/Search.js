@@ -7,8 +7,9 @@ import {
     addCityWeather,
     START_LOADING,
     END_LOADING,
-    citySelector,
+    addCityWeatherAjax,
 } from './../ducks/currentWeather'
+
 
 
 class Search extends Component{
@@ -24,7 +25,7 @@ class Search extends Component{
     }
 
     render() {
-        const {isLoading, cityName} = this.props
+        const {isLoading} = this.props
         if (isLoading) return <div className="container">Loading...</div>
         return (
             <div className="wheather-contatiner container">
@@ -34,7 +35,6 @@ class Search extends Component{
                     </div>
                     <button type="submit" className="btn btn-info">find</button>
                 </form>
-                <h1>{cityName ? cityName : "No city is chosen"}</h1>
             </div>
         )
     }
@@ -68,6 +68,12 @@ class Search extends Component{
 
     _failGetPosition = () => {}
 
+    handleSubmitWithAjaxMiddleware = event => { // for compare
+        event.preventDefault()
+        const {fetchWithAjaxMiddleWare} = this.props
+        fetchWithAjaxMiddleWare(this.state.input)
+    }
+
     handleSubmit = (event) => {
         event.preventDefault()
         const {fetchCityWeatherByQuery, endLoading} = this.props
@@ -81,7 +87,7 @@ class Search extends Component{
                 this.setState({input : ""})
                 endLoading()
             })
-        console.log('fetchCityWeatherByQuery return promise: ', promise instanceof Promise)
+        //console.log('fetchCityWeatherByQuery return promise: ', promise instanceof Promise)
     }
 
     handleChange = (event) => this.setState({input : event.target.value})
@@ -91,12 +97,14 @@ class Search extends Component{
 let mapStateToProps = (state, ownProps) => {
     return {
         isLoading : currentWeatherLoadingStateSelector(state),
-        cityName : citySelector(state),
     }
 }
 
 let mapDispatchToProps = (dispatch, ownProps) => {
     return {
+        fetchWithAjaxMiddleWare : query => {
+            dispatch(addCityWeatherAjax(query))
+        },
         fetchCityWeatherByQuery : (query) => {
             dispatch({
                 type : START_LOADING,
