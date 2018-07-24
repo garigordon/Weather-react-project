@@ -40,7 +40,35 @@ export const parseTime = timeStr => {
     return moment(timeStr, "YYYY-MM-DD HH:mm:ss")
 }
 
+export function throttle (func, ms) {
 
+    let isThrottled = false;
+    let savedArgs
+    let savedThis
+
+    function wrapper() {
+
+        if (isThrottled) {
+            savedArgs = arguments
+            savedThis = this
+            return
+        }
+
+        func.apply(this, arguments)
+
+        isThrottled = true
+
+        setTimeout(function() {
+            isThrottled = false
+            if (savedArgs) {
+                wrapper.apply(savedThis, savedArgs)
+                savedArgs = savedThis = null
+            }
+        }, ms)
+    }
+
+    return wrapper
+}
 
 
 // TODO

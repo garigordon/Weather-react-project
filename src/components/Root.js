@@ -2,12 +2,16 @@ import React from 'react'
 import {Provider} from 'react-redux'
 import App from './App'
 import store from '../redux'
+import {ConnectedRouter} from 'react-router-redux'
+import history from './../history'
 
 
 const Root = () => {
     return (
         <Provider store = {store}>
-            <App />
+            <ConnectedRouter history = {history}>
+                <App />
+            </ConnectedRouter>
         </Provider>
     )
 }

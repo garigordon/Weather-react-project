@@ -1,10 +1,17 @@
 import {createStore, applyMiddleware} from 'redux'
+import thunk from 'redux-thunk'
 import reducer from './reducer'
 import randomId from './middlewares/randomId'
 import loggerAc from './middlewares/logger'
 import actionsCounter from './middlewares/actionsCounter'
+import localData from './middlewares/localData'
+import {routerMiddleware} from 'react-router-redux'
+import history from './../history'
 
-const enhancer = applyMiddleware(randomId, loggerAc, actionsCounter)
+
+let routerMiddleWareWithHistory = routerMiddleware(history)
+
+const enhancer = applyMiddleware(thunk, routerMiddleWareWithHistory, randomId, loggerAc, actionsCounter, localData)
 
 const store = createStore(reducer, enhancer)
 
