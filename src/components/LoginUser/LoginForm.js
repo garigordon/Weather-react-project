@@ -4,7 +4,6 @@ import {
     loginFieldSelector,
     changeLoginField,
     checkAndLoginUser,
-    errorLoginFields,
     errorFormStateSelector
 }from '../../ducks/authUser'
 
@@ -71,7 +70,6 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     changeLoginField,
     checkAndLoginUser,
-    errorLoginFields
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

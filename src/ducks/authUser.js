@@ -20,6 +20,7 @@ export const RESET_LOGIN_FIELDS_STATE = `${prefix}/RESET_LOGIN_FIELDS_STATE`
 export const CHANGE_LOGIN_FORM_STATE = `${prefix}/CHANGE_LOGIN_FORM_STATE`
 export const SAVE_LOGIN_FORM_STATE =  `${prefix}/SAVE_LOGIN_FORM_STATE`
 export const ERROR_LOGIN_FORM_STATE =  `${prefix}/ERROR_LOGIN_FORM_STATE`
+export const ERROR_REGISTER_FORM_STATE =  `${prefix}/ERROR_REGISTER_FORM_STATE`
 export const SAVE_AUTH_USER =  `${prefix}/SAVE_AUTH_USER`
 
 /**
@@ -52,10 +53,10 @@ const defaultLogin = {
 }
 
 const defaultAuthedUser = {
-    id : null,
+    //id : null,
     email : "",
     name : "",
-    auth_token : null,
+    //auth_token : null,
 }
 
 const defaultState = {
@@ -135,6 +136,7 @@ const reducer = (state = defaultState, action) => {
                     }
                 }
             }
+            break
         }
         case RESET_LOGIN_FIELDS_STATE : {
             return {
@@ -144,6 +146,7 @@ const reducer = (state = defaultState, action) => {
                     fields : defaultLoginFields
                 }
             }
+            break
         }
         case SAVE_LOGIN_FORM_STATE : {
             let {fieldName, fieldValue} = payload
@@ -154,6 +157,7 @@ const reducer = (state = defaultState, action) => {
                     [fieldName] : fieldValue,
                 }
             }
+            break
         }
         case SAVE_AUTH_USER : {
             let {changeData = []} = payload
@@ -172,6 +176,7 @@ const reducer = (state = defaultState, action) => {
                     ...authedUser
                 }
             }
+            break
         }
         case ERROR_LOGIN_FORM_STATE : {
             let error = payload.error
@@ -186,6 +191,21 @@ const reducer = (state = defaultState, action) => {
                     }
                 }
             }
+            break
+        }
+        case ERROR_REGISTER_FORM_STATE : {
+            let error = payload.error
+            return {
+                ...state,
+                register : {
+                    ...state.register,
+                    formState : {
+                        ...state.register.formState,
+                        error : error
+                    }
+                }
+            }
+            break
         }
         default : {
             return state
@@ -209,6 +229,11 @@ export const loginFieldSelector = (state, fieldName) => {
 
 export const errorFormStateSelector = (state) => {
     return state[moduleName].login.formState.error
+}
+
+
+export const errorRegisterFormStateSelector = (state) => {
+    return state[moduleName].register.formState.error
 }
 
 /**
@@ -256,12 +281,18 @@ export const saveLoginFields = (fieldName, fieldValue) => {
     }
 }
 
-// TODO
-// add errorRegisterFields (and according constanta and case in reducer) as separate action creator
-
 export const errorLoginFields = (text) => {
     return {
         type : ERROR_LOGIN_FORM_STATE,
+        payload : {
+            error : text,
+        }
+    }
+}
+
+export const errorRegisterFilelds = (text) => {
+    return {
+        type : ERROR_REGISTER_FORM_STATE,
         payload : {
             error : text,
         }
@@ -319,13 +350,13 @@ export const checkAndRegisterUser = () => {
         */
 
 
-        if (!_checkRegisterEmpty()) {
-            // dispatch "Fill all input fields
+        if (!_checkRegisterEmpty({name, password, email})) {
+            dispatch(errorRegisterFilelds("Fill all register input fields"))
             return
         }
 
-        if (!_checkRegisterHasSuchEmail()) {
-            // dispatch "User with such email already exists"
+        if (!_checkRegisterHasSuchEmail({email})) {
+            dispatch(errorRegisterFilelds("User with such email already exists"))
             return
         }
 
@@ -371,26 +402,20 @@ export const checkAndRegisterUser = () => {
                 value : authUser.name,
             }
         ]))
-
-        // if (_checkRegister({name, password, email})){
-        //     // register user
-        //
-        // } else {
-        //     // TODO dispatch error "Validation fail"
-        // }
     }
 }
 
 const _checkRegisterEmpty = params => {
-
+    let {name, password, email} = params
+    if(name === "" || password === "" || email === ""){ // if (!name || !password || !email) {
+        return false
+    }else {
+        return true
+    }
 }
 
 const _checkRegisterHasSuchEmail = params => {
-
-}
-
-const _checkRegister = (params) => { // TODO split in two check @see _checkRegisterEmpty and _checkRegisterHasSuchEmail
-    let isOk = true
+    let {email} = params
     let users
     try {
         users = JSON.parse(localStorage.getItem(`${APP_NAME}-users`))
@@ -401,78 +426,34 @@ const _checkRegister = (params) => { // TODO split in two check @see _checkRegis
         users = []
     }
 
-    let {name, password, email} = params
-    if(name === "" || password === "" || email === ""){ // if (!name || !password || !email) {
-        isOk = false
-    }
     let hasSuchEmail = users.some((user) => {
         if (user.email === email){
             return true
         }
     })
     if(hasSuchEmail){
-        isOk = false
+        return false
     }
-    return isOk
 }
 
-
-export const checkAndLoginUser = params => (dispatch, getState) => { // TODO @see checkAndRegisterUser
+export const checkAndLoginUser = params => (dispatch, getState) => {
     let state = getState()
     let password = loginFieldSelector(state, "password")
     let email = loginFieldSelector(state, "email")
     if (!_checkLoginEmpty({email, password})) {
-        // dispatch "Fill all input fields
         dispatch(errorLoginFields("Fill all input fields"))
         return
-    }else {
-        dispatch(errorLoginFields(""))
     }
 
     if (!_checkLoginPasswordMatch({email, password})) {
-        // dispatch "User with such email already exists"
-        dispatch(errorLoginFields("User with such email already exists"))
+        dispatch(errorLoginFields("Login or password aren't correct"))
         return
     }
-    /*if(_checkLogin({email, password})){
-        let users
-        try {
-            users = JSON.parse(localStorage.getItem(`${APP_NAME}-users`))
-            if (!Array.isArray(users)){
-                users = []
-            }
-        } catch (e) {
-            users = []
-        }
-        let authUser = users.find((user) => {
-            if(user.email === email && user.password === password){
-                return true
-            }
-        })
 
-        if (authUser) {
-            dispatch(resetLoginFields())
-            dispatch(saveAuthUser([
-             {
-                 key : "email",
-                 value : authUser.email,
-             },
-             {
-                 key : "name",
-                 value : authUser.name,
-             }
-            ]))
-            dispatch(errorLoginFields(""))
-        } else {
-
-            // TODO dispatch error "Wrong login or password"
-        }
-    } else {
-        dispatch(errorLoginFields("Validation fail"))
-    }*/
-}
-
-const _checkLogin = (params) => { // TODO split in two check _checkLoginEmpty and (email and password match)
+    dispatch(errorLoginFields(""))
+    /*
+    * imagine, that this is a backend
+    * */
     let users
     try {
         users = JSON.parse(localStorage.getItem(`${APP_NAME}-users`))
@@ -482,42 +463,41 @@ const _checkLogin = (params) => { // TODO split in two check _checkLoginEmpty an
     } catch (e) {
         users = []
     }
-
-    let {password, email} = params
-    if(!email || !password){
-        return false
-    }
-
-    let hasSuchLogin = users.some((user) => {
-        if (user.email === email && user.password === password){
+    let authUser = users.find((user) => {
+        if(user.email === email && user.password === password){
             return true
         }
     })
-    if(!hasSuchLogin){
-        return false
+    /**/
+
+    if (authUser) {
+        dispatch(resetLoginFields())
+        dispatch(saveAuthUser([
+            {
+                key : "email",
+                value : authUser.email,
+            },
+            {
+                key : "name",
+                value : authUser.name,
+            }
+        ]))
     }
-    return true
 }
 
-//(_checkLoginEmpty and _checkLoginPasswordMatch)
 const _checkLoginEmpty = (params) => {
-    let users
-    try {
-        users = JSON.parse(localStorage.getItem(`${APP_NAME}-users`))
-        if (!Array.isArray(users)){
-            users = []
-        }
-    } catch (e) {
-        users = []
-    }
-
     let {password, email} = params
     if(!email || !password){
         return false
+    }else {
+        return true
     }
 }
 
 const _checkLoginPasswordMatch = (params) => {
+    /*
+    * imagine, that this is a backend
+    * */
     let users
     try {
         users = JSON.parse(localStorage.getItem(`${APP_NAME}-users`))
@@ -533,6 +513,8 @@ const _checkLoginPasswordMatch = (params) => {
             return true
         }
     })
+    /**/
+
     if(!hasSuchLogin){
         return false
     }

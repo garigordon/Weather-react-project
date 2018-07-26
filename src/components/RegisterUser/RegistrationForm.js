@@ -1,30 +1,18 @@
-// TODO get register errors from redux store
-// if there is any register error display them
-
-
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {
     registerFieldSelector,
     changeRegisterField,
-    checkAndRegisterUser
+    checkAndRegisterUser,
+    errorRegisterFormStateSelector
 } from '../../ducks/authUser'
 
 class RegisterForm extends Component{
 
     onSubmit = (e) => {
         e.preventDefault();
-        //const {userLogin} = this.props
-        //userLogin(this.state.email)
-        //userLogin(this.state.password)
         const {checkAndRegisterUser} = this.props
         checkAndRegisterUser()
-
-        /*this.props.login(this.state).then(
-            (res) => this.context.router.push('/'),
-            (err) => this.setState({ errors: err.response.data.errors, isLoading: false })
-        );*/
-
     }
 
     onChange = (e) => {
@@ -34,7 +22,7 @@ class RegisterForm extends Component{
     }
 
     render() {
-        const {email, password, name} = this.props
+        const {email, password, name, error} = this.props
         return(
             <div className="form">
                 <h2>Registration</h2>
@@ -72,6 +60,9 @@ class RegisterForm extends Component{
                     <div className="item">
                         <button className="btn btn-info">Registration</button>
                     </div>
+                    {
+                        !!error ? <p>{error}</p> : ""
+                    }
                 </form>
             </div>
 
@@ -82,13 +73,14 @@ class RegisterForm extends Component{
 const mapStateToProps = (state) => {
     return {
         name : registerFieldSelector(state, "name"),
-        email : registerFieldSelector(state, "email"), // TODO rename selector to login
+        email : registerFieldSelector(state, "email"),
         password : registerFieldSelector(state, "password"),
+        error : errorRegisterFormStateSelector(state, "error")
     }
 }
 
 const mapDispatchToProps = {
-    changeRegisterField, // TODO rename selector to login
+    changeRegisterField,
     checkAndRegisterUser
 };
 
